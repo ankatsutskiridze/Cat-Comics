@@ -1,0 +1,19 @@
+# scratch renders
+output/
+
+# reference videos (re-fetchable with yt-dlp; the written analysis stays in research/)
+research/reference-videos/
+
+# rendered video is never tracked; deliverables live on disk under final/
+*.mp4
+*.mov
+*.mkv
+*.webm
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# per-PC Claude-in-Chrome deviceId (each machine proves its own)
+.claude/browser.local

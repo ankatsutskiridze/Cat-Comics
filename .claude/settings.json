@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__claude-in-chrome",
+      "ClaudeInChromeDomain",
+      "ClaudeInChromeDomain(studio.youtube.com)"
+    ]
+  }
+}
