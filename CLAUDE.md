@@ -35,13 +35,27 @@ punchline close-up. Breakdown of the reference reel, beat by beat:
 
 1. Channel name, handle, channel ID (fill in **Channel** below; every skill
    reads it from there).
-2. The main characters (who the pet is, who the human is). Design them NEW
-   for this channel.
+2. The main characters. **The cat is DECIDED (Anka, 2026-10-25): sheet v4**,
+   see **The cat** below. Still open: the human, and the cat's name (Anka's
+   reference sheet says "Nefi"; not confirmed for this channel).
 3. How the animation is PRODUCED (the pipeline). Decide on the first video
    and record it here.
 4. Music source (see **Sound**).
 5. Upload slots and cadence (the tool defaults to the siblings' 5/day US
    window until changed: `SLOT_HOURS` / `PER_DAY` in `tools/yt_upload_prep.py`).
+
+## The cat (approved v4, 2026-10-25)
+
+- Approved look: [`characters/cat/cat_sheet_v4.png`](characters/cat/cat_sheet_v4.png);
+  what it keeps / drops from Anka's reference: [`characters/cat/README.md`](characters/cat/README.md).
+- Rules Anka set while designing it: normal cat proportions (not the reference's
+  stretched hero); **plain black body: no coloured lines or drawings anywhere** (face,
+  body, paws, tail) and **no hairs sticking out of the body** (cheek hair only); thick
+  fuller body; tail wide at the rump, slim middle, oval paddle tip, gentle S, never a
+  hook.
+- Rig: `lib/cat.py` (`draw_cat(surface, pose, x, y, head_px, yaw=, face=)`; poses are
+  data, faces in `FACES`). Change the look only through it, then re-render the sheet
+  (`python tools/make_cat_sheet.py <n>`) as a still for Anka before any video.
 
 ## Channel
 
