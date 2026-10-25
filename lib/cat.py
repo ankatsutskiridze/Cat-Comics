@@ -57,6 +57,9 @@ FACES = {
     'confused':  dict(eyes='round', mouth='flat', extra='question', look=(-0.5, -0.3)),
     'love':      dict(eyes='heart', mouth='smile', extra='hearts'),
     'scream':    dict(eyes='round', mouth='scream', extra='shock'),
+    'possessed': dict(eyes='blank', open=0.42, slant=0.0, mouth='gasp'),
+    'frenzy':    dict(eyes='blank', open=0.40, slant=0.25, mouth='scream'),
+    'proud':     dict(eyes='slit', open=0.40, slant=-0.10, mouth='smile', look=(0, 0.3)),
 }
 
 
@@ -150,6 +153,63 @@ def pose_bow(head_turn=0, head_roll=-8):
         legs=[fl, fr, bl, br], paws=[(-0.11, 0.05, 1.10), (0.11, 0.05, 1.07), bl_paw, br_paw],
         tail=[(0, 1.08, -0.50), (0, 1.40, -0.72), (0, 1.78, -0.78), (0, 2.08, -0.68), (0, 2.30, -0.56)],
         head=(0, 0.80, 0.86), head_turn=head_turn, head_roll=head_roll)
+
+
+def pose_stretch_splay(head_turn=0, head_roll=0, rise=0.0):
+    """Facing the camera: rump up, chest low, front legs splayed wide (the litter-box
+    stretch). rise 0..1 lifts the chest toward a stiff stance."""
+    c = 0.42 + 0.45 * rise
+    fl = [((-0.14, c, 0.36), 0.085), ((-0.30, c * 0.5 + 0.05, 0.62), 0.062), ((-0.42, 0.10, 0.80), 0.052)]
+    fr = [((0.14, c, 0.36), 0.085), ((0.30, c * 0.5 + 0.05, 0.62), 0.062), ((0.42, 0.10, 0.80), 0.052)]
+    bl, bl_paw = _back_leg(-0.20, (1.04, -0.40), (0.05, -0.46))
+    br, br_paw = _back_leg(0.20, (1.04, -0.40), (0.05, -0.46))
+    return dict(
+        torso=[((0, c, 0.36), 0.19), ((0, (c + 1.04) / 2 + 0.04, -0.02), 0.165), ((0, 1.06, -0.40), 0.185)],
+        neck=[((0, c + 0.04, 0.42), 0.13), ((0, c + 0.18, 0.62), 0.12)],
+        legs=[fl, fr, bl, br],
+        paws=[(-0.46, 0.05, 0.84), (0.46, 0.05, 0.84), bl_paw, br_paw],
+        tail=[(0, 1.10, -0.50), (0.12, 1.40, -0.66), (0.32, 1.72, -0.68), (0.44, 2.02, -0.58),
+              (0.40, 2.22, -0.44)],
+        head=(0, c + 0.40, 0.80), head_turn=head_turn, head_roll=head_roll)
+
+
+def pose_stiff(head_turn=0, head_roll=0, shake=0.0):
+    """Stiff, legs splayed out, back arched, head up: the 'possessed' stance."""
+    j = shake
+    fl, fl_paw = _front_leg(-0.15, (1.02, 0.36), (0.05, 0.40))
+    fr, fr_paw = _front_leg(0.15, (1.02, 0.36), (0.05, 0.40))
+    fl = [((p[0] - 0.12 * k / 2, p[1], p[2]), r) for k, (p, r) in enumerate(fl)]
+    fr = [((p[0] + 0.12 * k / 2, p[1], p[2]), r) for k, (p, r) in enumerate(fr)]
+    bl, bl_paw = _back_leg(-0.18, (1.06, -0.40), (0.05, -0.50))
+    br, br_paw = _back_leg(0.18, (1.06, -0.40), (0.05, -0.50))
+    return dict(
+        torso=[((0, 1.06, 0.38), 0.19), ((0, 1.16 + j, -0.02), 0.17), ((0, 1.08, -0.40), 0.185)],
+        neck=[((0, 1.12, 0.42), 0.13), ((0, 1.46, 0.56), 0.12)],
+        legs=[fl, fr, bl, br],
+        paws=[(fl_paw[0] - 0.12, fl_paw[1], fl_paw[2]), (fr_paw[0] + 0.12, fr_paw[1], fr_paw[2]), bl_paw, br_paw],
+        tail=[(0, 1.12, -0.50), (0.12, 1.44, -0.64), (0.32, 1.80, -0.66), (0.44, 2.10, -0.56), (0.40, 2.30, -0.42)],
+        head=(0, 1.70, 0.66), head_turn=head_turn, head_roll=head_roll)
+
+
+def pose_dig(phase=0.0, head_turn=0, head_roll=0):
+    """Facing the camera, rump up, digging with both front paws in turn (phase 0..1 = one
+    left+right scoop cycle)."""
+    def paw(sx, ph):
+        a = 2 * math.pi * ph
+        # a scoop: reach forward-down, drag back, lift and return
+        return (sx * (1 + 0.4 * max(0.0, math.sin(a))), 0.10 + 0.34 * max(0.0, math.sin(a)), 0.60 + 0.30 * math.cos(a))
+    fl_paw = paw(-0.16, phase)
+    fr_paw = paw(0.16, phase + 0.5)
+    fl, _ = _front_leg(-0.15, (0.52, 0.32), fl_paw[1:])
+    fr, _ = _front_leg(0.15, (0.52, 0.32), fr_paw[1:])
+    bl, bl_paw = _back_leg(-0.20, (1.00, -0.40), (0.05, -0.42))
+    br, br_paw = _back_leg(0.20, (1.00, -0.40), (0.05, -0.42))
+    return dict(
+        torso=[((0, 0.54, 0.32), 0.19), ((0, 0.82, -0.04), 0.165), ((0, 1.02, -0.40), 0.185)],
+        neck=[((0, 0.58, 0.38), 0.13), ((0, 0.74, 0.56), 0.12)],
+        legs=[fl, fr, bl, br], paws=[fl_paw, fr_paw, bl_paw, br_paw],
+        tail=[(0, 1.08, -0.50), (0.12, 1.40, -0.64), (0.32, 1.72, -0.62), (0.44, 2.00, -0.50), (0.40, 2.16, -0.36)],
+        head=(0, 0.98, 0.74), head_turn=head_turn, head_roll=head_roll)
 
 
 def pose_leap(head_turn=0, head_roll=6):
@@ -282,15 +342,30 @@ def _covered(ops, pt):
     return False
 
 
+def _smooth_noise(shape, sigma, rng):
+    """Unit-std gaussian-smoothed noise, built on a coarse grid and upsampled (fast)."""
+    step = max(1, int(sigma / 3))
+    small = rng.standard_normal((shape[0] // step + 4, shape[1] // step + 4))
+    small = ndimage.gaussian_filter(small, sigma=max(0.7, sigma / step))
+    n = ndimage.zoom(small, step, order=1)[:shape[0], :shape[1]] if step > 1 else small[:shape[0], :shape[1]]
+    return n / (n.std() + 1e-9)
+
+
 def _rough_alpha(mask, H, ss, seed):
     """Binary mask -> alpha with a brush-like irregular edge (supersampled)."""
     m = mask >= 128
-    sdf = ndimage.distance_transform_edt(m) - ndimage.distance_transform_edt(~m)
+    if ss > 1:                    # distance field at 1x, upsampled: 4x cheaper, same look
+        hh, ww = m.shape[0] // ss, m.shape[1] // ss
+        m1 = mask[:hh * ss, :ww * ss].reshape(hh, ss, ww, ss).mean(axis=(1, 3)) >= 128
+        sdf1 = ndimage.distance_transform_edt(m1) - ndimage.distance_transform_edt(~m1)
+        sdf = np.zeros(m.shape, np.float32)
+        z = ndimage.zoom(sdf1.astype(np.float32), ss, order=1)
+        sdf[:z.shape[0], :z.shape[1]] = z[:m.shape[0], :m.shape[1]] * ss
+    else:
+        sdf = ndimage.distance_transform_edt(m) - ndimage.distance_transform_edt(~m)
     rng = np.random.default_rng(seed)
-    n1 = ndimage.gaussian_filter(rng.standard_normal(m.shape), sigma=max(1.0, 0.03 * H * ss))
-    n1 /= n1.std() + 1e-9
-    n2 = ndimage.gaussian_filter(rng.standard_normal(m.shape), sigma=max(0.7, 0.006 * H * ss))
-    n2 /= n2.std() + 1e-9
+    n1 = _smooth_noise(m.shape, max(1.0, 0.03 * H * ss), rng)
+    n2 = _smooth_noise(m.shape, max(0.7, 0.006 * H * ss), rng)
     a = np.clip(sdf + (n1 * 0.006 + n2 * 0.0025) * H * ss + 0.5, 0, 1)
     if ss > 1:
         hh, ww = a.shape[0] // ss, a.shape[1] // ss
@@ -497,7 +572,7 @@ def _eye(ctx, hd, side, f):
     inner = -side                        # inner corner is toward the nose
     kind = f.get('eyes', 'slit')
     lx, ly = f.get('look', (0, 0))
-    if kind == 'slit':
+    if kind in ('slit', 'blank'):
         rx, ry = 0.148, 0.15
         op, sl = f.get('open', 0.67), f.get('slant', 0.53)
         y0 = -ry + (1 - op) * 2 * ry
@@ -514,6 +589,9 @@ def _eye(ctx, hd, side, f):
         ctx.clip_preserve()
         ctx.set_source_rgb(*EYE)
         ctx.fill()
+        if kind == 'blank':
+            ctx.restore()
+            return
         # slit pupil hanging from the lid, a gold sliver beside it
         px = lx * 0.06 + 0.012 * inner
         top = lid(px) - 0.02
@@ -609,9 +687,9 @@ def _nose_mouth(ctx, hd, f):
         ctx.move_to(-0.05, 0.012)
         ctx.curve_to(-0.02, -0.01, 0.02, -0.01, 0.05, 0.012)
         ctx.stroke()
-    elif mouth in ('o', 'scream'):
-        rx, ry = (0.03, 0.035) if mouth == 'o' else (0.10, 0.09)
-        cy = 0.02 if mouth == 'o' else 0.04
+    elif mouth in ('o', 'gasp', 'scream'):
+        rx, ry = {'o': (0.03, 0.035), 'gasp': (0.055, 0.06), 'scream': (0.10, 0.09)}[mouth]
+        cy = {'o': 0.02, 'gasp': 0.03, 'scream': 0.04}[mouth]
         _ellipse(ctx, 0, cy, rx, ry)
         ctx.set_source_rgb(*MOUTH)
         ctx.fill_preserve()
@@ -731,9 +809,22 @@ def draw_cat(surface, pose, ox, oy, H, yaw=0.0, face='smug', seed=7, shadow=True
     if pose.get('tail'):
         sm = _catmull([P(p) for p in pose['tail']], 12)
         n = len(sm)
-        tail_r = [_tail_radius(i / (n - 1)) * H for i in range(n)]
+        puff = pose.get('tail_puff', 0.0)
+        tail_r = [_tail_radius(i / (n - 1)) * H * (1 + 0.7 * puff * min(1.0, i / (0.3 * n)))
+                  for i in range(n)]
         for i in range(n - 1):
             m.capsule(tuple(sm[i]), tail_r[i], tuple(sm[i + 1]), tail_r[i + 1])
+        if puff > 0.05:                      # bristling: irregular fluff clumps along both edges
+            rnd = np.random.default_rng(seed + 7)
+            for i in range(int(0.25 * n), n - 1, 2):
+                dx, dy = sm[i + 1][0] - sm[i][0], sm[i + 1][1] - sm[i][1]
+                d = math.hypot(dx, dy) + 1e-9
+                for side in (-1, 1):
+                    if rnd.random() < 0.35:
+                        continue
+                    off = rnd.uniform(0.75, 1.05)
+                    c = (sm[i][0] - dy / d * side * tail_r[i] * off, sm[i][1] + dx / d * side * tail_r[i] * off)
+                    m.circle(c, tail_r[i] * rnd.uniform(0.18, 0.42) * puff)
         tail_pts = sm
         tail_ops = (tail_ops[0], len(m.ops))
     # head

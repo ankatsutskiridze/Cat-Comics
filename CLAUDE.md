@@ -40,7 +40,11 @@ punchline close-up. Breakdown of the reference reel, beat by beat:
    reference sheet says "Nefi"; not confirmed for this channel).
 3. How the animation is PRODUCED (the pipeline). Decide on the first video
    and record it here.
-4. Music source (see **Sound**).
+4. Sound: **TRIAL (Anka, 2026-10-25): no music, our own synthesised sound
+   effects** (`lib/sfx.py`, timed per scene, e.g. `scenes/litter_frenzy_audio.py`;
+   files + README in `sound/`). Anka wants popular songs but those cannot go in a
+   file we upload. YouTube Audio Library was checked and REJECTED by Anka
+   (2026-10-25: the tracks are too weak to be worth using).
 5. Upload slots and cadence (the tool defaults to the siblings' 5/day US
    window until changed: `SLOT_HOURS` / `PER_DAY` in `tools/yt_upload_prep.py`).
 
