@@ -36,8 +36,11 @@ punchline close-up. Breakdown of the reference reel, beat by beat:
 1. Channel name, handle, channel ID (fill in **Channel** below; every skill
    reads it from there).
 2. The main characters. **The cat is DECIDED (Anka, 2026-10-25): sheet v4**,
-   see **The cat** below. Still open: the human, and the cat's name (Anka's
-   reference sheet says "Nefi"; not confirmed for this channel).
+   see **The cat** below. **The girl (Anka, 2026-10-26)** = Anka's reference
+   sheet `characters/girl/reference_sheet_anka.jpeg`. A code-drawn version
+   (`lib/girl.py`, sheet v1) was REJECTED: it did not look like the sheet. She is
+   made as IMAGES Anka generates in the same image tool (prompts from us, per
+   pose/expression), cut out and animated in code. Still open: the cat's name.
 3. How the animation is PRODUCED (the pipeline). Decide on the first video
    and record it here.
 4. Sound: **TRIAL (Anka, 2026-10-25): no music, our own synthesised sound
