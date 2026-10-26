@@ -22,3 +22,5 @@
   by `lib/sfx.py`, timed by `scenes/alive_rig_audio.py`.
 - `full_bowl_sfx.wav`: effects track of `full_bowl`. Same source and licence: synthesised
   by `lib/sfx.py`, timed by `scenes/full_bowl_audio.py`.
+- `warm_spot_sfx.wav`: effects track of `warm_spot`. Same source and licence: synthesised
+  by `lib/sfx.py`, timed by `scenes/warm_spot_audio.py`.

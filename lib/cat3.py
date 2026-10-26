@@ -83,6 +83,9 @@ MOODS = {
     'confused':  dict(lid=0.10, slant=0.0, pupil=0.08, mouth='wavy', asym=1, ear_droop=1),
     'meow':      dict(closed=1, mouth='meow', ears_flat=1.1, jaw=1),
     'content':   dict(closed=1, mouth='smirk'),                 # eyes shut ^ ^, purring
+    'spooked':   dict(lid=-0.2, slant=-0.3, pupil=0.10, round_pupil=1, pupil_r=0.42, mouth='o', eye_scale=1.3,
+                      ears_flat=0.7, spiky=1),                  # scared: huge round pupils, ears back
+    'groom':     dict(closed=1, mouth='tongue'),                # eyes shut, tongue out: washing itself
 }
 
 
@@ -237,7 +240,7 @@ def _eye(ctx, cx, cy, side, m, look, blink, k_scale):
     py = max(lid_y, cy - ry * 0.9) + ry * 0.40 - 3 + ly * ry * 0.25
     ctx.set_source_rgb(*INK)
     if m.get('round_pupil'):
-        ctx.arc(px, py + 2, rx * 0.2, 0, 2 * math.pi)
+        ctx.arc(px, py + 2, rx * m.get('pupil_r', 0.2), 0, 2 * math.pi)
         ctx.fill()
     else:
         pw, ph = rx * m.get('pupil', 0.08) * 1.25, ry * 0.44

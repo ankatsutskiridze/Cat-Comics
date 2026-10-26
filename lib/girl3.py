@@ -119,7 +119,7 @@ def _bone_weights(part, pts):
         W[:, ix['hips']] = k
     elif part == 'shorts':
         legk = _band(y, 610, 700)
-        near = (x < 165).astype(float)
+        near = 1 - _band(x, 135, 195)            # soft: the two thighs pivot at different points
         W[:, ix['hips']] = 1 - legk
         W[:, ix['thigh_n']] = legk * near
         W[:, ix['thigh_f']] = legk * (1 - near)
@@ -177,9 +177,20 @@ def _with_gravity(pose):
     return pose
 
 
+# Around these joints a point that is part parent, part child is ROTATED part of the way
+# (its share of the child's angle, about the child's pivot) instead of blending the two
+# matrices: a linear blend collapses a joint bent ~90 deg (sitting) into a flat wedge.
+JOINTS = (('hips', ('thigh_n', 'thigh_f')), ('thigh_n', ('shin_n',)), ('thigh_f', ('shin_f',)))
+BENT_PARTS = ('leg_near', 'leg_far', 'shorts')
+# a bent knee: the thigh's back edge would poke past the calf (and the calf past the thigh);
+# each side is kept on its own side of the joint's bisector, so they meet in a crease
+CREASES = (('thigh_n', 'shin_n'), ('thigh_f', 'shin_f'))
+
+
 class _Skin:
     def __init__(self, pose):
         G = transforms(_with_gravity(pose))
+        self.G = G
         self.stack = np.stack([G[n] for n in BONE_NAMES])
         self.cache = model()['weights']
         self.turn = pose.get('turn', 0.0)
@@ -203,7 +214,59 @@ class _Skin:
                 g = g * (pts[:, 1] < 240)
             P = pts + np.c_[self.turn * 10 * g, self.nod * 8 * g]
         V = np.c_[P, np.ones(len(P))]
-        return np.einsum('nb,bij,nj->ni', W, self.stack, V)[:, :2]
+        out = np.einsum('nb,bij,nj->ni', W, self.stack, V)[:, :2]
+        if part in BENT_PARTS:
+            self._bend(W, P, out)
+        return out
+
+    def _bend(self, W, P, out):
+        ix = {n: i for i, n in enumerate(BONE_NAMES)}
+        for parent, kids in JOINTS:
+            cols = [ix[parent]] + [ix[k] for k in kids]
+            others = np.delete(W, cols, axis=1).sum(axis=1)
+            wk = W[:, [ix[k] for k in kids]]
+            kk = wk.sum(axis=1)
+            rows = (others < 1e-9) & (kk > 1e-9) & (W[:, ix[parent]] > 1e-9)
+            if not rows.any():
+                continue
+            Gp = self.G[parent]
+            Gi = np.linalg.inv(Gp)
+            phis, pivs, us = [], [], []
+            for k in kids:
+                M = Gi @ self.G[k]                   # the child relative to its parent
+                R = M[:2, :2]
+                piv = np.array(BONES[k][1])
+                phis.append(math.atan2(R[1, 0], R[0, 0]))
+                pivs.append(piv)
+                us.append(M[:2, 2] - (np.eye(2) - R) @ piv)   # what is left after the turn
+            sh = wk[rows] / kk[rows, None]           # share of each child
+            phi = (sh @ np.array(phis)) * kk[rows]
+            piv = sh @ np.array(pivs)
+            u = (sh @ np.array(us)) * kk[rows, None]
+            d = P[rows] - piv
+            c, s_ = np.cos(phi), np.sin(phi)
+            q = np.c_[c * d[:, 0] - s_ * d[:, 1], s_ * d[:, 0] + c * d[:, 1]] + piv + u
+            out[rows] = (np.c_[q, np.ones(len(q))] @ Gp.T)[:, :2]
+        for upper, lower in CREASES:
+            wu, wl = W[:, ix[upper]], W[:, ix[lower]]
+            mine = (wu + wl) > 0.5
+            if not mine.any():
+                continue
+            Gu = self.G[upper]
+            M = np.linalg.inv(Gu) @ self.G[lower]
+            phi = math.atan2(M[1, 0], M[0, 0])
+            if abs(phi) < math.radians(25):
+                continue
+            c_w = (Gu @ np.array([*BONES[lower][1], 1.0]))[:2]
+            h = phi / 2
+            n_l = np.array([-math.sin(h), math.cos(h)])            # into the lower limb's side
+            n_w = Gu[:2, :2] @ n_l
+            n_w /= np.hypot(*n_w)
+            side = (out - c_w) @ n_w
+            # only near the joint (the far ends of the limbs are never clamped)
+            near = np.hypot(*(out - c_w).T) < 90
+            fix = mine & near & (((wu >= wl) & (side > 0)) | ((wu < wl) & (side < 0)))
+            out[fix] -= side[fix, None] * n_w[None, :]
 
 
 # ------------------------------------------------------------------ drawing helpers
@@ -808,6 +871,26 @@ def _draw_part(ctx, skin, name, part):
         _stroke_var(ctx, skin(name, pts, ('L', li)), wid * 0.9, col)
 
 
+# The far leg-hole's corner of the shorts (src px). With both legs folded (sitting,
+# crouching) the far thigh swings it out over the near thigh as a second hem; there it is
+# drawn behind the near leg instead of on top.
+FAR_HOLE = [(172.0, 598.0), (300.0, 598.0), (300.0, 700.0), (172.0, 700.0)]
+
+
+def _folded(pose):
+    rn = pose.get('thigh_n', {}).get('rot', 0.0)
+    rf = pose.get('thigh_f', {}).get('rot', 0.0)
+    return min(abs(rn), abs(rf)) > 45 and abs(rn - rf) < 20
+
+
+def _far_hole(skin):
+    ring = []
+    for (ax, ay), (bx, by) in zip(FAR_HOLE, FAR_HOLE[1:] + FAR_HOLE[:1]):
+        for u in np.linspace(0, 1, 12, endpoint=False):
+            ring.append((ax + (bx - ax) * u, ay + (by - ay) * u))
+    return skin('shorts', np.array(ring), None)
+
+
 def draw_girl(ctx, x, y, scale, pose=None, expr='smile', blink=0.0, look=(0.0, 0.0), talk=0.0, flip=False,
               arms=None):
     """arms: {'n': arm, 'f': arm}, arm = dict(sh, el, wr, hand='relaxed'|'open'|'grip',
@@ -828,7 +911,27 @@ def draw_girl(ctx, x, y, scale, pose=None, expr='smile', blink=0.0, look=(0.0, 0
     ctx.set_line_join(cairo.LINE_JOIN_ROUND)
     ctx.set_fill_rule(cairo.FILL_RULE_EVEN_ODD)
     far_front = False
+    folded = _folded(pose)
     for name in M['order']:
+        if name == 'leg_near' and folded:
+            _draw_part(ctx, skin, 'shorts', M['parts']['shorts'])      # under the near leg
+        if name == 'shorts' and folded:
+            ctx.save()
+            ctx.rectangle(-2000, -2000, 5000, 5000)
+            hole = _far_hole(skin)
+            _rings_path(ctx, [hole])
+            ctx.clip()
+            _draw_part(ctx, skin, name, M['parts'][name])
+            ctx.restore()
+            # the cut is the shorts' hem there: ink it, inside the shorts only
+            ctx.save()
+            _rings_path(ctx, [skin('shorts', r, None) for f in M['parts'][name]['fills'] if f['tag'] == 'base'
+                              for rings in f['shapes'].values() for r in rings])
+            ctx.clip()
+            edge = np.vstack([hole[36:], hole[:1]])            # its near side, (172, 700) -> (172, 598)
+            _stroke_var(ctx, edge, np.full(len(edge), 2.6))
+            ctx.restore()
+            continue
         if name == 'hair_back':
             for f in M['parts'][name]['fills']:
                 if f['tag'] == 'base':
