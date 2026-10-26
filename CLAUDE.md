@@ -43,7 +43,12 @@ punchline close-up. Breakdown of the reference reel, beat by beat:
    made as IMAGES Anka generates in the same image tool (prompts from us, per
    pose/expression), cut out and animated in code. Still open: the cat's name.
 3. How the animation is PRODUCED (the pipeline). Decide on the first video
-   and record it here.
+   and record it here. **Rule (Anka, 2026-10-26, on `night_meow`): it must look
+   like an ANIMATED video, not like still pictures with cut-outs glued on top.**
+   `night_meow` (static scene images + a sliding cut-out cat, one drawing per
+   beat) was kept as is but read as "photos stitched together". Next videos need
+   real motion: characters that move between drawings (more frames per action,
+   mouth/eyes/body animating), not single pastes that slide or swap.
 4. Sound: **TRIAL (Anka, 2026-10-25): no music, our own synthesised sound
    effects** (`lib/sfx.py`, timed per scene, e.g. `scenes/litter_frenzy_audio.py`;
    files + README in `sound/`). Anka wants popular songs but those cannot go in a

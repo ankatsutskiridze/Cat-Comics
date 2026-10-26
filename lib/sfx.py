@@ -232,6 +232,42 @@ def purr(dur=1.6):
     return norm(x * np.clip(t / 0.25, 0, 1) * np.clip((dur - t) / 0.4, 0, 1))
 
 
+def tick(f=3200):
+    """A clock tick: a tiny bright click with a short body."""
+    t = _t(0.06)
+    x = band(noise(0.06), 2000, 7000) * np.exp(-t * 160) + 0.5 * np.sin(2 * np.pi * f * t) * np.exp(-t * 90)
+    return norm(x)
+
+
+def thump(dur=0.18):
+    """Soft paws landing on something."""
+    t = _t(dur)
+    x = np.sin(2 * np.pi * (90 + 60 * np.exp(-t * 40)) * t) * np.exp(-t * 28) + 0.3 * low(noise(dur), 900) * np.exp(-t * 40)
+    return norm(x)
+
+
+def rustle(dur=0.5, seed=4):
+    """Bed sheets moving."""
+    rng = np.random.default_rng(seed)
+    x = band(rng.standard_normal(_n(dur)), 600, 5000)
+    t = _t(dur) / dur
+    am = np.convolve(np.abs(rng.standard_normal(_n(dur))), np.hanning(2400), 'same')
+    return norm(x * am * np.sin(np.pi * t))
+
+
+def crickets(dur, seed=2):
+    """Distant night crickets: chirp trains of a ~4.4 kHz tone."""
+    rng = np.random.default_rng(seed)
+    n = _n(dur)
+    t = np.arange(n) / SR
+    out = np.zeros(n)
+    for f, rate, ph in [(4400, 0.9, 0.0), (4750, 0.7, 0.4)]:
+        gate = (np.sin(2 * np.pi * rate * t + ph * 6) > 0.6).astype(float)
+        pulse = (np.sin(2 * np.pi * 30 * t) > 0).astype(float)
+        out += np.sin(2 * np.pi * f * t) * gate * pulse
+    return norm(low(out, 6000))
+
+
 def room_tone(dur):
     return norm(low(band(noise(dur), 60, 3000), 1200)) * 0.5
 
