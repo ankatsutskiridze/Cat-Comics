@@ -41,9 +41,16 @@ punchline close-up. Breakdown of the reference reel, beat by beat:
    sheet `characters/girl/reference_sheet_anka.jpeg`. A code-drawn version
    (`lib/girl.py`, sheet v1) was REJECTED: it did not look like the sheet. She is
    made as IMAGES Anka generates in the same image tool (prompts from us, per
-   pose/expression), cut out and animated in code. Still open: the cat's name.
-3. How the animation is PRODUCED (the pipeline). Decide on the first video
-   and record it here. **Rule (Anka, 2026-10-26, on `night_meow`): it must look
+   pose/expression), cut out and animated in code. The cat's name: **Toby** (Anka, 2026-10-26: "Toby and Anka").
+3. The pipeline (Anka, 2026-10-26): characters and scenes are Gemini images
+   (prompts from us, master refs attached; the girl's hair recoloured red by
+   `tools/recolor_hair.py`), cut out on a green/grey screen (`tools/chroma_cut.py`,
+   `tools/cutout.py`) and animated in code. **The cat puppet in
+   `scenes/alive_test.py` is APPROVED ("the cat's movements are ideal")**:
+   `lib/puppet.py` = the sheet's big sitting body + the sheet's expression heads
+   swapped on (moods, meow), eyelid blink, breathing, head tilt, crouch, an arc
+   jump with a pose, a squash on landing. Walks: foot-planted cycles anchored at
+   the hip (4 drawings is the minimum; 8 look natural). The girl's walk in `alive_test` (hip-anchored, foot-planted, eased steps, trailing hair) is APPROVED (Anka, 2026-10-26). **Rule (Anka, 2026-10-26, on `night_meow`): it must look
    like an ANIMATED video, not like still pictures with cut-outs glued on top.**
    `night_meow` (static scene images + a sliding cut-out cat, one drawing per
    beat) was kept as is but read as "photos stitched together". Next videos need
@@ -56,6 +63,37 @@ punchline close-up. Breakdown of the reference reel, beat by beat:
    (2026-10-25: the tracks are too weak to be worth using).
 5. Upload slots and cadence (the tool defaults to the siblings' 5/day US
    window until changed: `SLOT_HOURS` / `PER_DAY` in `tools/yt_upload_prep.py`).
+
+- **HARD RULE (Anka, 2026-10-26, "last warning"): never put the generated images into a
+  video as stills or cut-outs.** They are REFERENCES to build the characters from. In
+  videos both characters are animated rigs that move and act. The girl = `lib/girl2.py` (her head art from the
+  master sheet with eyes/mouth drawn per emotion + a vector 3D body: sits, stands, blinks,
+  breathes, hands move). Characters ENTER a place by moving there (walk / jump), never by
+  popping in. The cat = `lib/cat2.py` (the same 3D rig restyled to the Gemini
+  sheet: soft black, thin dark outline, cream slit eyes, cheek spikes, chest tufts; sheet
+  `characters/cat/cat2_sheet_v5.png`). First video built this way: `scenes/bathroom_alive.py`.
+- **REJECTED (Anka, 2026-10-26, "terrible, they are still photos"): mesh rigs that bend the
+  generated drawings** (`lib/rig.py`, `cat_rig`, `cat_walk`, `cat_bust`, `girl_stand`,
+  `girl_bed`, [`docs/rigs.md`](docs/rigs.md); clips `night_meow_alive`, `night_shift_alive`,
+  `alive_rig` deleted on Anka's request). Bending, breathing and texture swaps on one image
+  still read as a photo. Do not offer this again as "animation".
+- **Anka, 2026-10-26 (repeated, firm): NO image of any kind goes into a video. The photos /
+  sheets are only models of how Toby and Anka look; both are built in code and animated, and
+  must be able to do any movement or action.**
+- **The way (Anka, 2026-10-26): the images are MODELS; we draw our own characters in code to
+  match them as exactly as possible, redrawn every frame.** Cat = `lib/cat3.py` (cairo vectors
+  measured off the Gemini sheet's main sitting pose, 8 sheet expressions, blink / look / head
+  roll+yaw / ears / crouch / breathe / meow jaw): **APPROVED ("the cat is good; we refine the
+  movements along the way")**. Preview `output/cat3_preview/`. Girl = `lib/girl3.py` (vector
+  model measured off the master sheet's big figure by `tools/trace_girl3.py` ->
+  `characters/girl/girl3_model.npz`; bones for head / hair locks / chest / legs, procedural
+  eyes / blink / mouth): **APPROVED (Anka, 2026-10-26, "good")**; the walk is still rough.
+  Anka (2026-10-26): the characters must be able to do ANYTHING (sit, stand up, help, pick
+  things up...). girl3 now has: drawn arms + hands (relaxed / open / grip, IK `arm_ik`, props
+  in the hand), both legs as full drawings (the far leg = the near leg moved), whole-body
+  STATES (stand, crouch, squat_pet, sit_chair, sit_floor, lie_back, bend, wave, hands_hips,
+  shrug, stretch) that `blend` smoothly, `Walker` with planted feet, hair that hangs by
+  gravity. Demo of all of it: `scenes/anka_moves.py`. Both together: `scenes/meet_preview.py`.
 
 ## The cat (Anka, 2026-10-26)
 

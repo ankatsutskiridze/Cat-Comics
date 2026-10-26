@@ -11,7 +11,7 @@ import cairo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, 'lib'))
-import cat  # noqa: E402
+import cat2 as cat  # noqa: E402
 
 W, H = 2400, 3400
 PAPER = cat.rgb('#efebe4')
@@ -69,7 +69,6 @@ def main(version):
     ctx.paint()
 
     # hero
-    splatter(ctx, 180, 380, 1050, 1150)
     cat.draw_cat(surf, cat.pose_sit(), 620, 1430, 440, face='smug')
     label(ctx, 70, 120, 'the cat  -  character sheet v%d' % version, 54)
 
@@ -111,7 +110,7 @@ def main(version):
 
     # colours
     label(ctx, 1500, 3320, 'Colors', 38)
-    for i, c in enumerate(cat.PALETTE):
+    for i, c in enumerate([cat.INK, cat.EYE, cat.NOSE]):
         ctx.arc(1690 + i * 100, 3305, 34, 0, 2 * math.pi)
         ctx.set_source_rgb(*c)
         ctx.fill_preserve()
@@ -119,7 +118,7 @@ def main(version):
         ctx.set_line_width(2)
         ctx.stroke()
 
-    out = os.path.join(ROOT, 'characters', 'cat', 'cat_sheet_v%d.png' % version)
+    out = os.path.join(ROOT, 'characters', 'cat', 'cat2_sheet_v%d.png' % version)
     surf.write_to_png(out)
     print(out)
 
