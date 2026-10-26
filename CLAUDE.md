@@ -35,8 +35,9 @@ punchline close-up. Breakdown of the reference reel, beat by beat:
 
 1. Channel name, handle, channel ID (fill in **Channel** below; every skill
    reads it from there).
-2. The main characters. **The cat is DECIDED (Anka, 2026-10-25): sheet v4**,
-   see **The cat** below. **The girl (Anka, 2026-10-26)** = Anka's reference
+2. The main characters. **The cat (Anka, 2026-10-26: "exactly this cat")** =
+   the Gemini sheet `characters/cat/reference_sheet_gemini.jpg`, made as images
+   like the girl; see **The cat** below. **The girl (Anka, 2026-10-26)** = Anka's reference
    sheet `characters/girl/reference_sheet_anka.jpeg`. A code-drawn version
    (`lib/girl.py`, sheet v1) was REJECTED: it did not look like the sheet. She is
    made as IMAGES Anka generates in the same image tool (prompts from us, per
@@ -51,18 +52,17 @@ punchline close-up. Breakdown of the reference reel, beat by beat:
 5. Upload slots and cadence (the tool defaults to the siblings' 5/day US
    window until changed: `SLOT_HOURS` / `PER_DAY` in `tools/yt_upload_prep.py`).
 
-## The cat (approved v4, 2026-10-25)
+## The cat (Anka, 2026-10-26)
 
-- Approved look: [`characters/cat/cat_sheet_v4.png`](characters/cat/cat_sheet_v4.png);
-  what it keeps / drops from Anka's reference: [`characters/cat/README.md`](characters/cat/README.md).
-- Rules Anka set while designing it: normal cat proportions (not the reference's
-  stretched hero); **plain black body: no coloured lines or drawings anywhere** (face,
-  body, paws, tail) and **no hairs sticking out of the body** (cheek hair only); thick
-  fuller body; tail wide at the rump, slim middle, oval paddle tip, gentle S, never a
-  hook.
-- Rig: `lib/cat.py` (`draw_cat(surface, pose, x, y, head_px, yaw=, face=)`; poses are
-  data, faces in `FACES`). Change the look only through it, then re-render the sheet
-  (`python tools/make_cat_sheet.py <n>`) as a still for Anka before any video.
+- Look: [`characters/cat/reference_sheet_gemini.jpg`](characters/cat/reference_sheet_gemini.jpg)
+  (Gemini, from `characters/cat/prompt_cat_sheet.md`): soft-black body, thin dark-brown
+  outline, cream eyes with slit pupils, tiny pink nose, spiky cheek fur, small fur tufts,
+  long tail with a rounded tip. **No coloured marks or drawings anywhere on the cat.**
+- Made as IMAGES, like the girl: Anka generates poses in Gemini with the sheet
+  attached; `python tools/cut_cat_poses.py <sheet.jpg> <name>...` cuts each pose out to
+  `characters/cat/poses/<name>.png` (RGBA). Sources in `characters/cat/poses/src/`.
+- The old code rig `lib/cat.py` (graffiti cat, sheet v4) is NOT this cat; it stays
+  only because `scenes/litter_frenzy.py` uses it.
 
 ## Channel
 

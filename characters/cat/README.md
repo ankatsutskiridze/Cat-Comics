@@ -1,4 +1,8 @@
-# The cat (APPROVED: sheet v4, Anka 2026-10-25)
+# The cat
+
+**Current (Anka, 2026-10-26): `reference_sheet_gemini.jpg`, made as images; poses in
+`poses/` (see `poses/README.md`).** Everything below is the OLD code-drawn cat (sheet v4,
+`lib/cat.py`), kept as a record.
 
 - Design source: `reference_sheet_anka.jpeg` (Anka, 2026-10-25), shapes measured off its
   head close-up and "In action" figures: tall sharp ears continuing the head's sides with a

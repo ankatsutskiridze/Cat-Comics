@@ -14,6 +14,7 @@ from scipy import ndimage
 TARGET_HUE = 2.0 / 360        # clear red
 SAT_GAIN = 1.45
 VAL_GAIN = 1.12
+VMAX = 0.78                   # pinker, lighter things (shorts, blush) stay out
 
 
 def rgb_to_hsv(a):
@@ -40,7 +41,7 @@ def main(src, dst, x0, y0, x1, y1, preview=None):
     im = np.asarray(Image.open(src).convert('RGB')).astype(float) / 255
     h, s, v = rgb_to_hsv(im)
     hue = h * 360
-    m = (((hue < 14) | (hue > 345)) & (s > 0.28) & (v > 0.12) & (v < 0.9)).astype(float)
+    m = (((hue < 14) | (hue > 345)) & (s > 0.28) & (v > 0.12) & (v < VMAX)).astype(float)
     box = np.zeros_like(m)
     box[y0:y1, x0:x1] = 1
     m *= box
